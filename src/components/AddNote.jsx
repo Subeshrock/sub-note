@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, Text, Textarea, Button, Group } from "@mantine/core";
-import { useMutation } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { supabase } from "../utils/supabaseClient";
 import { useSessionUser } from "../hooks/useSessionUser";
 
@@ -8,6 +8,10 @@ function AddNote() {
   const [noteText, setNoteText] = useState("");
   const [empty, setEmpty] = useState(false);
   const user = useSessionUser();
+
+  const queryClient = useQueryClient();
+
+  const characterLimit = 200;
 
   const insertNote = async (noteText) => {
     try {
@@ -21,19 +25,21 @@ function AddNote() {
     }
   };
 
-  const mutation = useMutation(insertNote);
-
-  const handleAddNote = (e) => {
-    e.preventDefault();
-    mutation.mutate(noteText);
-  };
-
-  const characterLimit = 200;
+  const mutation = useMutation(insertNote, {
+    onSuccess: () => {
+      queryClient.invalidateQueries("get-notes");
+    },
+  });
 
   const handleChange = (e) => {
     if (characterLimit - e.target.value.length >= 0) {
       setNoteText(e.target.value);
     }
+  };
+
+  const handleAddNote = (e) => {
+    e.preventDefault();
+    mutation.mutate(noteText);
   };
 
   useEffect(() => {

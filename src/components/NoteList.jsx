@@ -8,10 +8,10 @@ function NoteList() {
 
   return (
     <SimpleGrid cols={3}>
+      <AddNote />
       {data?.map((note) => (
         <Note key={note.id} note={note} />
       ))}
-      <AddNote />
     </SimpleGrid>
   );
 }
